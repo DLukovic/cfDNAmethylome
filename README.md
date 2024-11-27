@@ -112,6 +112,11 @@ create environment for alignment
 		conda create --name methylenv
 
 create indices
-		$ bwameth.py index /Users/gyongyosilab/Documents/ccfDNA_Projekt/Reference_Sequences/hg38.fa 
+		
+   		bwameth.py index /Users/gyongyosilab/Documents/ccfDNA_Projekt/Reference_Sequences/hg38.fa 
+
+Important: add --read group information, these annotations help downstram tools distinguish sampels or batches of reads
+
+Execute bwameethalignment using *snakemake* workflow management system.
 
 
