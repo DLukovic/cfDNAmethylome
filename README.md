@@ -99,3 +99,19 @@ Reference Sequence Directory
 ===============================
 
 		java -Xmx4g -Xms4g -jar picard.jar CreateSequenceDictionary REFERENCE=/Users/gyongyosilab/Documents/ccfDNA\ Projekt/Reference\ Sequences/hg38.fa  	OUTPUT=/Users/gyongyosilab/Documents/ccfDNA\ Projekt/Reference\ Sequences/hg38.dict
+
+
+Alignment
+==========
+install bwameth.py in conda environment
+
+		conda install bioconda::bwameth
+
+create environment for alignment
+
+		conda create --name methylenv
+
+create indices
+		$ bwameth.py index /Users/gyongyosilab/Documents/ccfDNA_Projekt/Reference_Sequences/hg38.fa 
+
+
