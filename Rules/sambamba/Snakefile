@@ -1,1 +1,22 @@
+import os
+import snakemake.io
+import glob
 
+(SAMPLES,) = glob_wildcards("{sample}.bam")
+
+rule all:
+    input:
+        expand("{sample}_filtered.bam", sample=SAMPLES)
+
+rule sambamba_view:
+    input:
+        "{sample}.bam"
+    output:
+        "{sample}_filtered.bam"
+    params: 
+        extra = "-h -t 4 -p -f bam -l 0 \
+         --filter 'not secondary_alignment and not failed_quality_control and not supplementary and proper_pair and mapping_quality > 0'"
+    shell:
+        """
+        sambamba view {params.extra} {input} -o {output}
+        """
