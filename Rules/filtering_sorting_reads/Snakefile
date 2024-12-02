@@ -1,0 +1,40 @@
+import os
+import snakemake.io
+import glob
+
+# Define the sample names based on the original BAM files
+SAMPLES, = glob_wildcards("{sample}.bam")
+
+# Rule to process all sorted BAM files
+rule all:
+    input:
+        expand("sorted/{sample}_filtered.sorted.bam", sample=SAMPLES)
+
+# Rule to filter BAM files using sambamba
+rule sambamba_view:
+    input:
+        "{sample}.bam"
+    output:
+        "filtered/{sample}_filtered.bam"
+    params:
+        extra = "-h -t 4 -p -f bam -l 0 \
+         --filter 'not secondary_alignment and not failed_quality_control and not supplementary and proper_pair and mapping_quality > 0'"
+    shell:
+        """
+        mkdir -p filtered
+        sambamba view {params.extra} {input} -o {output}
+        """
+
+# Rule to sort BAM files using sambamba
+rule sambamba_sort:
+    input:
+        "filtered/{sample}_filtered.bam"
+    output:
+        "sorted/{sample}_filtered.sorted.bam"
+    params:
+        extra = "-t 16 -l 0 -p"
+    shell:
+        """
+        mkdir -p sorted
+        sambamba sort {params.extra} {input} -o {output}
+        """
