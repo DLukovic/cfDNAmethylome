@@ -179,8 +179,44 @@ the extracted methylation metrics will result in noisier and less accurate data.
 
 Example: <img width="294" alt="image" src="https://github.com/user-attachments/assets/b5a4b9cf-a82e-4b63-a69e-995aa6e8d8ea" />
 
+Run mbias:
 
-	
+		 MethylDackel mbias /Path/to//Reference_Sequences/hg38.fa \
+                 DE07NGSLABD100887_markdup.bam DE07NGSLABD100887_mbias
+
+
+Results
+-------
+Suggested inclusion options:
+
+		Cardio		--OT 5,0,0,80 --OB 0,96,22,0
+		CardioTox   	--OT 5,0,0,80 --OB 0,96,20,0
+		Healthy		--OT 5,0,0,80 --OB 0,96,20,0	
+		NonCardioTox	--OT 5,0,0,80 --OB 0,96,20,0
+		Pulmo		--OT 5,0,0,80 --OB 0,96,20,0
+
+
+Explanation:
+
+Explanation: 
+
+		--OT
+Include reads for the Original Top (OT) strand starting from position 5 and ending at position 80.
+Exclude positions 1–4 and anything beyond position 80.
+
+		--OB
+Include reads for the Original Bottom (OB) strand starting from position 2 (position 1 is excluded).
+End inclusion at position 97.
+
+		MethylDackel extract --minDepth 5 \
+			             --maxVariantFrac 0.25  \
+				     --OT 5,101,1,80 \
+				     --OB 1,96,20,101 \
+		 		     --mergeContext \
+				     /Path/to/Reference_Sequences/hg38.fa \
+				     DE07NGSLABD100887.markdup.bam \
+				     -o DE07NGSLABD100887_methylome_biased_report.txt
+	 
 
 
 
