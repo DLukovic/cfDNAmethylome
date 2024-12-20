@@ -1,0 +1,30 @@
+import os
+import snakemake.io
+import glob
+
+# Define the sample names based on the original BAM files
+SAMPLES = glob_wildcards("markdupl/{sample}.markdup.bam").sample
+print("Samples found:", SAMPLES)
+rule all:
+    input:
+        expand("MethylDackel/{sample}_CpG.bedGraph", sample=SAMPLES )
+
+
+rule methylation_extract:
+    input:
+        bam="markdupl/{sample}.markdup.bam",
+        reference="/Users/gyongyosilab/Documents/ccfDNA_Projekt/Reference_Sequences/hg38.fa"
+    output:
+        "MethylDackel/{sample}_CpG.bedGraph"
+    shell:
+        """
+        MethylDackel extract --minDepth 5 \
+                             --maxVariantFrac 0.25 \
+                             --OT 5,101,1,80 \
+                             --OB 1,96,20,101 \
+                             --mergeContext \
+                             {input.reference} \
+                             {input.bam} \
+                             -o MethylDackel/{wildcards.sample}
+        """
+
