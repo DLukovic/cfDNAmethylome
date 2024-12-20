@@ -170,3 +170,18 @@ Generate additional performance metrics:
 
 Apply Snakemake [workflow](Rules/picard/picard_metrics) rules.
 
+Calling methylation (MethylDackel)
+==================================
+Check for bias and clean reads before calling CpGs. In an ideal experiment, we expect that the probability of observing a methylated C is constant across the length
+of any given read. In practice, however, there are often increases/decreases in observed methylation rate at the
+ends of reads and/or more global changes. These are termed methylation bias and including such regions in
+the extracted methylation metrics will result in noisier and less accurate data.
+
+Example: ![image](https://github.com/user-attachments/assets/223ddadc-b8d6-43fb-9452-7506d58be773)
+
+
+
+
+
+
+
