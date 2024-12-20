@@ -118,3 +118,55 @@ Next steps requires presence of *--read-group* in BAM files. For filtering and s
 Run in Snakemake [workflow](Rules/filtering_sorting_reads/Snakefile).
 
 
+Mark duplicates and Picard metrics
+==================================
+Mark duplicates: run different parameters for a random flow cell or a patterned flow cell. The optical pixel
+distance should be changed accordingly, random = 100 and patterned = 2500 based on GATK best practices.
+
+		picard -Xmx4g -Xms4g MarkDuplicates \
+		-I DE07NGSLABD100887_filtered.sorted.bam \
+		-O DE07NGSLABD100887.markdup.bam
+		--REFERENCE_SEQUENCE /Path/to/Reference_Sequences/hg38.fa\
+		--METRICS_FILE 	DE07NGSLABD100887_picard_markdup_raw_metrics.txt \
+		--CREATE_INDEX false \
+		--MAX_RECORDS_IN_RAM 1000 \
+	        --SORTING_COLLECTION_SIZE_RATIO 0.15 \
+		--ASSUME_SORTED true \
+		--OPTICAL_DUPLICATE_PIXEL_DISTANCE 2500
+
+Convert BED file to interval list:
+
+		picard -Xmx4g -Xms4g BedToIntervalList \
+		-I /Path/to/Reference_Sequences/covered_targets_Twist_Methylome_hg38_annotated_collapsed.bed \
+		-O covered_targets_Twist_Methylome_hg38_annotated_collapsed_intervals \
+		-SD /Users/gyongyosilab/Documents/ccfDNA_Projekt/Reference_Sequences/hg38.dict
+
+Generate performance metrics:
+Coverage cap setting is increased to 1000 for accurate metrics at higher sequencing depths Picard HsMetrics calculate important performance metrics , such as Fold-80 Base Penalty, HS Library Size, Percent Duplicates, and Percent Off Bait.
+
+		picard -Xmx4g -Xms4g CollectHsMetrics \
+		--INPUT DE94NGSLABD100873.markdup.bam \
+		--OUTPUT DE94NGSLABD100873_hs_metrics.txt \
+		-R /Path/to/Reference_Sequences/hg38.fa \
+		--BAIT_INTERVALS  /Path/to/Reference_Sequences/covered_targets_Twist_Methylome_hg38_annotated_collapsed_intervals \
+    		--TARGET_INTERVALS /Path/to/Reference_Sequences/covered_targets_Twist_Methylome_hg38_annotated_collapsed_intervals \
+		--MINIMUM_MAPPING_QUALITY 20 \
+		--COVERAGE_CAP 1000 \
+		--PER_TARGET_COVERAGE DE94NGSLABD100873_hsmetrics_pertargetcoverage.txt \
+		--NEAR_DISTANCE 500
+
+Generate additional performance metrics:
+
+		picard -Xmx4g -Xms4g CollectMultipleMetrics \ 
+  		--INPUT markdupl/DE17NGSLABD100901.markdup.bam \
+    		--OUTPUT DE17NGSLABD100901multiplemetrics \
+		-R /Path/to/Reference_Sequences/hg38.fa \
+  		--PROGRAM CollectGcBiasMetrics \
+    		--PROGRAM CollectInsertSizeMetrics \
+      		--PROGRAM CollectAlignmentSummaryMetrics
+  		
+	
+
+
+Apply Snakemake [workflow](Rules/picard/picard_metrics) rules.
+
