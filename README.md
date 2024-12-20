@@ -177,7 +177,9 @@ of any given read. In practice, however, there are often increases/decreases in 
 ends of reads and/or more global changes. These are termed methylation bias and including such regions in
 the extracted methylation metrics will result in noisier and less accurate data.
 
-Example: ![image](https://github.com/user-attachments/assets/223ddadc-b8d6-43fb-9452-7506d58be773)
+Example: <img width="294" alt="image" src="https://github.com/user-attachments/assets/b5a4b9cf-a82e-4b63-a69e-995aa6e8d8ea" />
+
+         <img width="262" alt="image" src="https://github.com/user-attachments/assets/de28218c-2775-45fd-96e1-ced50cfcfe8c" />
 
 
 
