@@ -36,6 +36,31 @@ Download reference sequences
 
 		$ gzip -d hg38.fa.gz
 
+Trim adapters 	
+=============================
+Trim adapters using TrimGalore!
+
+Dependencies: cutadapt - export to your PATH
+
+search for cutadapt: 
+		$ echo $PATH | tr ":" "\n" | grep "cutadapt" 
+write into .zprofile file:
+
+		# Setting PATH for CUTADAPT
+		  export PATH=$PATH:$HOME/.local/bin
+		 
+run in terminal:
+
+		$ source ~/.zprofile
+
+Use Snakemake Workflow to trim adapter from paired fastqfiles.
+
+Trimming individual sample:
+
+ 
+	
+	
+ 	~/TrimGalore-0.6.10/trim_galore --cores 8 --output_dir output --fastqc --2colour 20 --paired DE17NGSLABD100901_1.fq.gz DE17NGSLABD100901_2.fq.gz 
 
 
 Generate reference genome index and dictionary file (bwa, samtools, Picard)
