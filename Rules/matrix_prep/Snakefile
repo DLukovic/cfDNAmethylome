@@ -1,0 +1,53 @@
+import yaml
+
+with open("config.yaml", "r") as file:
+    config = yaml.safe_load(file)
+
+print("Loaded config:", config)
+# Parse the config file
+samples = []
+for group, files in config["samples"].items():
+    base_path = config["directories"][group]
+    for sample in files:
+        samples.append({
+            "directory": group,
+            "path": f"{base_path}/{sample}",
+            "sample": sample.replace("_CpG_noXY.bedGraph", "")  # Remove suffix for clean naming
+        })
+
+
+rule all:
+    input:
+        "merged_matrix.bed"
+
+rule preprocess_bedgraph:
+    input:
+        lambda wildcards: [s["path"] for s in samples]
+    params:
+        cleaned_dir="cleaned"
+    output:
+        expand("cleaned/{sample}_clean.bed", sample=[s["sample"] for s in samples])
+    shell:
+        """
+        for input_file in {input}; do
+            sample=$(basename $input_file _CpG_noXY.bedGraph)
+            mkdir -p cleaned
+            awk 'NR > 1 {{print $1, $2, $3, $4}}' OFS="\t" "$input_file" > "cleaned/${{sample}}_clean.bed"
+        done
+        """
+rule prepare_input_matrix:
+    input:
+        bedgraphs=expand("cleaned/{sample}_clean.bed", sample=[s["sample"] for s in samples])
+    output:
+        "merged_matrix.bed"
+    params:
+        names=[f"{s['directory']}_{s['sample']}" for s in samples]
+    conda:
+        "bedtools.yml"
+    shell:
+        """
+        bedtools unionbedg -i {input.bedgraphs} \
+            -names {params.names} \
+            -filler . \
+            -header > {output}
+        """
