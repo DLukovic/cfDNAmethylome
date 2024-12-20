@@ -105,4 +105,16 @@ Apply following options:
 	
 Execute bwameethalignment using *snakemake*  [workflow](Rules/bwameth/Snakefile) management system.
 
+Filter BAM files
+==================
+Next steps requires presence of *--read-group* in BAM files. For filtering and sorting .bam files use sambamba package in following steps
+	
+		sambamba view -h -t 4 -p \
+		--filter 'not secondary_alignment and not failed_quality_control and not supplementary and proper_pair and mapping_quality > 0' \
+		-f bam -l 0 \
+		DE17NGSLABD100901_trimmed.bam \
+		 -o filtered.bam
+		 
+Run in Snakemake [workflow](Rules/filtering_sorting_reads/Snakefile).
+
 
