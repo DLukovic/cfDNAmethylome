@@ -76,49 +76,6 @@ bwa needs to contstruct an index, -a for BWT index, bwtsv is optiom implemented 
 
 		samtools faidx hg38.fa > hg38.fa.fai
 		
-Downsampling process using seqtk
-=========================================
-+	Inspect the number of reads and pasepairs in fastq file
-
-		gzip -dc DE02NGSLABD100880_1.fq.gz | 
-    	 awk 'NR%4==2{c++; l+=length($0)}
-          	END{
-                print "Number of reads: "c; 
-                print "Number of bases in reads: "l
-              }'
-	`gzip -dc` inspect fasq file without having  to decompress the file 
-	
-	`awk` operates on each line of input from the decompressed fastq file focusing on the certain lines
-	
-	`NR%4==2` NR is build in variable in awk that tracks the record number of line number, in this case awk operates only on the second line of every 4 line group
-	
-	`{c++; l+=length($0)}` or accumulating counts
-	
-	`c++`	increments the read count (c) by 1 each time sequence line is encountered, providing the total count of reads
-	
-	`l += length($0)` adds the length of the current sequence line ($0 represents the entire line) to l, accumulating the total number of bases across all reads.
-	
-	`END` block fter all lines are processed, the END block is executed. Here, the total number of reads (c) and the total number of bases (l) are printed.
-print "Number of reads: " c outputs the count of reads.
-print "Number of bases in reads: " l outputs the cumulative number of bases.
-
-Downsample to final total reads according to formula:
-
-Total wanted basepairs: count of base pairs in merged probes x 250 raw coverage
-
-Final Total reads = total wanted basepairs / (2*100[forward and reverse reads in 100 bp])
-
-+ Count total number of base pairs in all samples
-
-		for file in /input_path/*.gz; do
-   		gzip -dc "$file" | 
-       	 awk 'NR%4==2{c++; l+=length($0)}
-             	END{
-                   print "Number of reads: "c; 
-                   print "Number of bases in reads: "l
-                 }'
-		   /output_path
-		done
 
 Reference Sequence Directory 
 ===============================
@@ -140,8 +97,12 @@ create indices
 		
    		bwameth.py index /Users/gyongyosilab/Documents/ccfDNA_Projekt/Reference_Sequences/hg38.fa 
 
-Important: add --read group information, these annotations help downstram tools distinguish sampels or batches of reads
+Apply following options:
 
-Execute bwameethalignment using *snakemake* workflow management system.
+	@RG: Read group header.
+	ID:foo: Identifier for the read group.
+	SM:bar: Sample name. These annotations help downstream tools distinguish samples or batches of reads.
+	
+Execute bwameethalignment using *snakemake*  [a relative link](path%20with%20spaces/other_file.md) workflow management system.
 
 
