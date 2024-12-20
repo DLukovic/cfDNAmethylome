@@ -184,6 +184,8 @@ Run mbias:
 		 MethylDackel mbias /Path/to//Reference_Sequences/hg38.fa \
                  DE07NGSLABD100887_markdup.bam DE07NGSLABD100887_mbias
 
+Use Snakemake [rule](Rules/mbias/Snakefile).
+
 
 Results
 -------
@@ -208,6 +210,8 @@ Exclude positions 1–4 and anything beyond position 80.
 Include reads for the Original Bottom (OB) strand starting from position 2 (position 1 is excluded).
 End inclusion at position 97.
 
+Run MethylDackel:
+
 		MethylDackel extract --minDepth 5 \
 			             --maxVariantFrac 0.25  \
 				     --OT 5,101,1,80 \
@@ -216,6 +220,12 @@ End inclusion at position 97.
 				     /Path/to/Reference_Sequences/hg38.fa \
 				     DE07NGSLABD100887.markdup.bam \
 				     -o DE07NGSLABD100887_methylome_biased_report.txt
+
+
+Run MethylDackel with Snakemake [workflow](Rules/MethylDackel/Snakefile). Output is .bedGraphfile.
+
+awk '{methylated+=$4; unmethylated+=$5} END {print "Methylated:", methylated, "Unmethylated:", unmethylated, "Methylation Level:", methylated/(methylated+unmethylated)}' DE07NGSLABD100880_methylome_biased_CpG.bedGraph
+
 	 
 
 
