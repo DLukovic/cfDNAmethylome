@@ -103,6 +103,6 @@ Apply following options:
 	ID:foo: Identifier for the read group.
 	SM:bar: Sample name. These annotations help downstream tools distinguish samples or batches of reads.
 	
-Execute bwameethalignment using *snakemake*  [a relative link](Rules/bwameth/Snakefile) workflow management system.
+Execute bwameethalignment using *snakemake*  [workflow](Rules/bwameth/Snakefile) workflow management system.
 
 
