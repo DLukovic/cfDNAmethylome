@@ -78,7 +78,7 @@ bwa needs to contstruct an index, -a for BWT index, bwtsv is optiom implemented 
 		
 
 Reference Sequence Directory 
-===============================
+---------------------------
 
 		java -Xmx4g -Xms4g -jar picard.jar CreateSequenceDictionary REFERENCE=/Users/gyongyosilab/Documents/ccfDNA\ Projekt/Reference\ Sequences/hg38.fa  	OUTPUT=/Users/gyongyosilab/Documents/ccfDNA\ Projekt/Reference\ Sequences/hg38.dict
 
@@ -103,6 +103,6 @@ Apply following options:
 	ID:foo: Identifier for the read group.
 	SM:bar: Sample name. These annotations help downstream tools distinguish samples or batches of reads.
 	
-Execute bwameethalignment using *snakemake*  [a relative link](path%20with%20spaces/other_file.md) workflow management system.
+Execute bwameethalignment using *snakemake*  [a relative link](Rules/bwameth/Snakefile) workflow management system.
 
 
