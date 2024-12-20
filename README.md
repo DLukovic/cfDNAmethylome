@@ -231,6 +231,7 @@ Exclude XY chromosomes from the MethylDackel output to eliminate sex-related bia
 		awk '$1 != "X" && $1 != "Y"' "$input_file" > "$output_file"							 
 		awk '$1 != "X" && $1 != "Y"'  DE02NGSLABD100880_CpG.bedGraph > DE02NGSLABD100880_CpG_noXY.bedGraph"	
 
+Run Snakemake [workflow](Rules/bedGraph_preprocess/Snakefile) to preprocess .bedGraph files and retrieve statistics.
 
 Calling DMRs using Metilene
 ===========================
