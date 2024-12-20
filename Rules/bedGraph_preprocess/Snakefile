@@ -1,0 +1,143 @@
+import glob
+
+# Get all input files from multiple directories
+INPUT_FILES = glob.glob("Healthy/*.bedGraph") + glob.glob("CardioTox/*.bedGraph") + glob.glob("NonCardioTox/*.bedGraph")
+
+# Extract sample names and directories dynamically
+SAMPLES = [
+    {"directory": f.split("/")[0], "sample": f.split("/")[-1].replace("_CpG.bedGraph", "")}
+    for f in INPUT_FILES
+]
+
+print("Samples found:", SAMPLES)
+
+rule all:
+    input:
+        "final_stats_table.tsv",  # Final aggregated statistics table
+        "plots/mean_methylation.png",
+        "plots/median_methylation.png"  # Final graphical outputs
+
+rule process_bedGraph:
+    input:
+        "{directory}/{sample}_CpG.bedGraph"
+    output:
+        "filtered/{directory}/{sample}_CpG_noXY.bedGraph"
+    log:
+        "logs/{directory}/{sample}.log"
+    shell:
+        """
+        # Process the file to remove X and Y chromosomes rows
+        awk '!($0 ~ /X/ || $0 ~ /Y/)' {input} > {output} 2> {log}
+        """
+
+rule calculate_meth_stats:
+    input: 
+        "filtered/{directory}/{sample}_CpG_noXY.bedGraph"
+    output:
+        "stats/{directory}/{sample}_CpG_methylation_stats.txt"
+    log:
+        "logs/{directory}/{sample}_stats.log"
+    run:
+        import pandas as pd
+
+        # Read the bedGraph file with appropriate column names
+        columns = ["chromosome", "start", "end", "methylation_percentage", "methylated_reads", "unmethylated_reads"]
+        data = pd.read_csv(input[0], sep="\t", names=columns, skiprows=1)
+
+        # Calculate statistics
+        mean_methylation = data["methylation_percentage"].mean()
+        median_methylation = data["methylation_percentage"].median()
+        total_regions = len(data)
+        weighted_mean = (data["methylation_percentage"] * (data["end"] - data["start"])).sum() / (data["end"] - data["start"]).sum()
+
+        # Write statistics to the output file
+        with open(output[0], "w") as stats_file:
+            stats_file.write(f"mean_methylation\t{mean_methylation:.4f}\n")
+            stats_file.write(f"median_methylation\t{median_methylation:.4f}\n")
+            stats_file.write(f"total_regions\t{total_regions}\n")
+            stats_file.write(f"weighted_mean\t{weighted_mean:.4f}\n")
+
+rule merge_stats:
+    input:
+        expand("stats/{directory}/{sample}_CpG_methylation_stats.txt", 
+               zip, 
+               sample=[s["sample"] for s in SAMPLES], 
+               directory=[s["directory"] for s in SAMPLES])
+    output:
+        "final_stats_table.tsv"
+    run:
+        import pandas as pd
+
+        # Collect all statistics
+        stats_list = []
+        for file in input:
+            with open(file, "r") as f:
+                stats = {line.split("\t")[0]: float(line.split("\t")[1]) for line in f}
+                stats["sample"] = file.split("/")[-1].replace("_CpG_methylation_stats.txt", "")
+                stats["group"] = file.split("/")[1]  # Directory name (Cardio or CardioTox)
+                stats_list.append(stats)
+
+        # Create a DataFrame and save to a single table
+        df = pd.DataFrame(stats_list)
+        df = df[["sample", "group", "mean_methylation", "median_methylation", "total_regions", "weighted_mean"]]
+        df.to_csv(output[0], sep="\t", index=False)
+
+rule graph:
+    input:
+        table="final_stats_table.tsv"
+    output:
+        mean_plot="plots/mean_methylation.png",
+        median_plot="plots/median_methylation.png"
+    log:
+        "logs/graph.log"
+    run:
+        # Use a non-interactive backend
+        import matplotlib
+        matplotlib.use('Agg')
+
+        import pandas as pd
+        import matplotlib.pyplot as plt
+        import os
+
+        # Load data
+        table = pd.read_csv(input.table, sep="\t")
+
+        # Create output directory if it doesn't exist
+        os.makedirs("plots", exist_ok=True)
+
+        # Define custom colors for each group
+        group_colors = {
+            "Cardio": "red",
+            "CardioTox": "blue",
+            "NonCardioTox": "green"
+        }
+
+        # Plot Mean Methylation
+        plt.figure(figsize=(10, 6))
+        for group, color in group_colors.items():
+            subset = table[table["group"] == group]
+            plt.bar(subset["sample"], subset["mean_methylation"], label=group, color=color)
+
+        plt.xlabel("Samples")
+        plt.ylabel("Mean Methylation")
+        plt.title("Mean Methylation Across Samples")
+        plt.xticks(rotation=90, fontsize=8)
+        plt.legend()
+        plt.tight_layout()
+        plt.savefig(output.mean_plot)
+        plt.close()
+
+        # Plot Median Methylation
+        plt.figure(figsize=(10, 6))
+        for group, color in group_colors.items():
+            subset = table[table["group"] == group]
+            plt.bar(subset["sample"], subset["median_methylation"], label=group, color=color)
+
+        plt.xlabel("Samples")
+        plt.ylabel("Median Methylation")
+        plt.title("Median Methylation Across Samples")
+        plt.xticks(rotation=90, fontsize=8)
+        plt.legend()
+        plt.tight_layout()
+        plt.savefig(output.median_plot)
+        plt.close()
