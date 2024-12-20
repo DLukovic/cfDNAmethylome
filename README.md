@@ -226,7 +226,77 @@ Run MethylDackel with Snakemake [workflow](Rules/MethylDackel/Snakefile). Output
 
 awk '{methylated+=$4; unmethylated+=$5} END {print "Methylated:", methylated, "Unmethylated:", unmethylated, "Methylation Level:", methylated/(methylated+unmethylated)}' DE07NGSLABD100880_methylome_biased_CpG.bedGraph
 
-	 
+Exclude XY chromosomes from the MethylDackel output to eliminate sex-related biases:
+
+		awk '$1 != "X" && $1 != "Y"' "$input_file" > "$output_file"							 
+		awk '$1 != "X" && $1 != "Y"'  DE02NGSLABD100880_CpG.bedGraph > DE02NGSLABD100880_CpG_noXY.bedGraph"	
+
+
+Calling DMRs using Metilene
+===========================
+
+1.    .bedGraph files preprocessing:
+	.bedGraphfiles containg track and 6 columns- fix it: (Use awk to remove the header and keep only the 					first 4 columns:)
+
+		awk 'NR > 1 {print $1, $2, $3, $4}' OFS='\t' Sample_1.bedGraph > Sample_1_clean.bedGraph
+		
+2.    create Matrix of samples/.bedGraph files
+
+Bedtools unionbedg combines multiple .bedGraph files into a single file such that one can directly compare coverage (and other text-values such as genotypes) across multiple sample. .bedGraph files have to be tab delimited, sorted, containing 4 columns (chromosomes, start, end, methylation proportion).
+
+		
+		
+		bedtools unionbedg -i Sample_1_clean_sorted.bedGraph Sample_2_clean_sorted.bedGraph \
+				   -header \ 
+				   -names cardio_1 pulmo_2 > input_metilene.bed
+
+Use Snakemake [rule](Rules/matrix_prep/Snakefile) to construct matrix of .bedGraph output from MethylDackel.
+			
+3.To prepare output for metilene, it is necessary to remove the 3th column ("end) from the matrix.		
+		
+		awk -F'\t' 'BEGIN {OFS="\t"} { $3=""; $1=$1; print }' merged_matrix.bed > matrix.bed	
+		
+
+Metilene :
+The first group is considered as a control group (g1) and the second (g2) group is relative to control group
+		
+		metilene -a Healthy -b Cardio_LC matrix.bed | sort -V -k1,1 -k2,2n > metilene_output.bed
+		metilene -a Healthy -b Pulmo_LC matrix.bed | sort -V -k1,1 -k2,2n > metilene_output_healthy_pulmo_lc.bed
+
+To visualise data, use Perls script:
+
+		perl /System/Volumes/Data/Users/gyongyosilab/metilene_v0.2-8/metilene_output.pl
+		perl /Users/gyongyosilab/metilene_v0.2-8/metilene_output.pl -q metilene_output.bed -a Healthy -b Cardio_LC
+
+
+Metilene output:
+
+*metilene_output.bed* the raw, unfiltered output, all identified DMRs, also outside of gived threshold (0.05)
+
+*metilene_qval.0.05.out* filtered according to the parameters set for the pipeline run.
+
+Metilene_output.bed (RAW output) :
+
+		chr		start	stop	q-value	meth.diff	CpGs	p (MWU)		o(2D KS)	mean g1	mean g2
+		chr1	10469	10576	1		-5.749990	10		0.24023		0.38309		71.25	77
+		chr1	135159	135280	1		2.923485	10		5.5992e-05	0.0032001	91.642	88.718
+
+
+Metilene_qval.0.05.out:
+
+		chr		start	stop	q-value		met.diff	CpGs	mean g1 mean g1
+		chr1	1439669	1439938	0.0011631	4.702479	44		82.068	77.366
+		chr1	1629043	1630187	0.00060914	3.722891	88		19.764	16.041
+
+q-val (adjusted p-Vlaue; per default Bonferroni adjusted based on MWU-test p-values )
+
+How many DMRs were identified ?
+
+		wc -l metilene_qval.0.05.out
+
+Healthy vs Cardio_LC : 
+* 89754 metilene_output.bed
+* 292 metilene_qval.0.05.out
 
 
 
