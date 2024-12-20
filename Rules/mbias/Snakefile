@@ -1,0 +1,27 @@
+import glob
+
+# Define the sample names based on the original BAM files
+SAMPLES = glob.glob("*.markdup.bam")
+SAMPLES = [bam.replace(".markdup.bam", "") for bam in SAMPLES]
+
+
+# Rule outputs for each sample
+mbias_plots = expand("{sample}_mbias_OT.svg", sample=SAMPLES) + expand("{sample}_mbias_OB.svg", sample=SAMPLES)
+
+rule all:
+    input:
+        mbias_plots
+
+rule methyldackel_mbias:
+    input:
+        bam="{sample}.markdup.bam",
+        bai="{sample}.markdup.bam.bai",
+        ref="/Users/gyongyosilab/Documents/ccfDNA_Projekt/Reference_Sequences/hg38.fa"
+    output:
+        OT_svg="{sample}_mbias_OT.svg",
+        OB_svg="{sample}_mbias_OB.svg"
+ 
+    shell:
+        """
+        MethylDackel mbias -@ 16 {input.ref} {input.bam} {wildcards.sample}_mbias
+        """
