@@ -179,7 +179,8 @@ the extracted methylation metrics will result in noisier and less accurate data.
 
 Example: <img width="294" alt="image" src="https://github.com/user-attachments/assets/b5a4b9cf-a82e-4b63-a69e-995aa6e8d8ea" />
 
-         <img width="262" alt="image" src="https://github.com/user-attachments/assets/de28218c-2775-45fd-96e1-ced50cfcfe8c" />
+
+	
 
 
 
