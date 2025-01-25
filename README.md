@@ -253,7 +253,7 @@ Bedtools unionbedg combines multiple .bedGraph files into a single file such tha
 
 Use Snakemake [rule](Rules/matrix_prep/Snakefile) to construct matrix of .bedGraph output from MethylDackel.
 			
-3.To prepare output for metilene, it is necessary to remove the 3th column ("end) from the matrix.		
+3.	To prepare input for metilene, it is necessary to remove the 3th column ("end) from the matrix.		
 		
 		awk -F'\t' 'BEGIN {OFS="\t"} { $3=""; $1=$1; print }' merged_matrix.bed > matrix.bed	
 		
@@ -261,14 +261,14 @@ Use Snakemake [rule](Rules/matrix_prep/Snakefile) to construct matrix of .bedGra
 Metilene :
 The first group is considered as a control group (g1) and the second (g2) group is relative to control group
 		
-		metilene -a Healthy -b Cardio_LC matrix.bed | sort -V -k1,1 -k2,2n > metilene_output.bed
+		metilene -a Healthy -b Pulmo matrix.bed | sort -V -k1,1 -k2,2n > metilene_output.bed 
 		metilene -a Healthy -b Pulmo_LC matrix.bed | sort -V -k1,1 -k2,2n > metilene_output_healthy_pulmo_lc.bed
 
 To visualise data, use Perls script:
 
 		perl /System/Volumes/Data/Users/gyongyosilab/metilene_v0.2-8/metilene_output.pl
-		perl /Users/gyongyosilab/metilene_v0.2-8/metilene_output.pl -q metilene_output.bed -a Healthy -b Cardio_LC
-
+		perl /Users/gyongyosilab/metilene_v0.2-8/metilene_output.pl -q metilene_output.bed -a Healthy -b Cardio
+		perl /Users/gyongyosilab/metilene_v0.2-8/metilene_output.pl -q metilene_output.bed -a Healthy -b Pulmo
 
 Metilene output:
 
@@ -278,14 +278,14 @@ Metilene output:
 
 Metilene_output.bed (RAW output) :
 
-		chr		start	stop	q-value	meth.diff	CpGs	p (MWU)		o(2D KS)	mean g1	mean g2
+		chr	start	stop	q-value	     meth.diff	CpGs	p (MWU)		o(2D KS)	mean g1	mean g2	
 		chr1	10469	10576	1		-5.749990	10		0.24023		0.38309		71.25	77
 		chr1	135159	135280	1		2.923485	10		5.5992e-05	0.0032001	91.642	88.718
 
 
 Metilene_qval.0.05.out:
 
-		chr		start	stop	q-value		met.diff	CpGs	mean g1 mean g1
+		chr	start	stop	q-value		met.diff	CpGs	mean g1 mean g1	
 		chr1	1439669	1439938	0.0011631	4.702479	44		82.068	77.366
 		chr1	1629043	1630187	0.00060914	3.722891	88		19.764	16.041
 
